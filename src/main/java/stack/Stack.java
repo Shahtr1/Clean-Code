@@ -1,4 +1,4 @@
-package org.example;
+package stack;
 
 public class Stack {
 
