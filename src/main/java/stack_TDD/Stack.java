@@ -1,4 +1,4 @@
-package stack;
+package stack_TDD;
 
 public class Stack {
 
@@ -6,7 +6,7 @@ public class Stack {
     private int[] elements = new int[2];
 
     public boolean isEmpty() {
-        return size==0;
+        return size == 0;
     }
 
     public void push(int element) {
@@ -15,7 +15,7 @@ public class Stack {
     }
 
     public int pop() {
-        if(isEmpty())
+        if (isEmpty())
             throw new Underflow();
 
         return elements[--size];
