@@ -1,5 +1,7 @@
 package avoid.switchcase;
 
+/*
+
 public abstract class Employee{
     public abstract boolean isPayday();
     public abstract Money calculatePay();

@@ -1,5 +1,7 @@
 package avoid.switchcase;
 
+/*
+
 public class PayrollProblem {
     public Money calculatePay(Employee e) throws InvalidEmployeeType {
         switch(e.type) {
