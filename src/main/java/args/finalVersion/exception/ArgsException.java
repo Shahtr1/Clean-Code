@@ -1,4 +1,4 @@
-package args.exception;
+package args.finalVersion.exception;
 
 
 public class ArgsException extends Exception {

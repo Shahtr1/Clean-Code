@@ -1,10 +1,10 @@
-package args.marshaler;
+package args.finalVersion.marshaler;
 
-import args.exception.ArgsException;
+import args.finalVersion.exception.ArgsException;
 
 import java.util.Iterator;
 
-import static args.exception.ArgsException.ErrorCode.*;
+import static args.finalVersion.exception.ArgsException.ErrorCode.*;
 
 public class DoubleArgumentMarshaler implements ArgumentMarshaler {
     private double value = 0;

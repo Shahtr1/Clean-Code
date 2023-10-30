@@ -1,12 +1,12 @@
-package args.marshaler;
+package args.finalVersion.marshaler;
 
-import args.exception.ArgsException;
+import args.finalVersion.exception.ArgsException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static args.exception.ArgsException.ErrorCode.MISSING_STRING;
+import static args.finalVersion.exception.ArgsException.ErrorCode.MISSING_STRING;
 
 
 public class StringArrayArgumentMarshaler implements ArgumentMarshaler {

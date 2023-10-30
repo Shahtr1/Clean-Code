@@ -1,11 +1,13 @@
-package args;
+package args.finalVersion;
 
-import args.exception.ArgsException;
-import args.marshaler.*;
+import args.finalVersion.exception.ArgsException;
+
+import static args.finalVersion.exception.ArgsException.ErrorCode.*;
+
+import args.finalVersion.marshaler.*;
 
 import java.util.*;
 
-import static args.exception.ArgsException.ErrorCode.*;
 
 public class Args {
     private final Map<Character, ArgumentMarshaler> marshalers;

@@ -1,6 +1,7 @@
-package args;
+package args.finalVersion;
 
-import args.exception.ArgsException;
+
+import args.finalVersion.exception.ArgsException;
 
 public class Main {
     public static void main(String[] args) {
