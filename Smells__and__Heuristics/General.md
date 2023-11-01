@@ -165,6 +165,198 @@ it may seem intuitive to move the formatting logic of `reportHours` into the `Ho
 make `HourlyEmployee` aware of the report format. This could violate several principles of object-oriented design, such
 as encapsulation.
 
-**Conclusion**:
-Feature Envy can be a signal to rethink class responsibilities. However, it's crucial to weigh the trade-offs and
-consider the broader implications on the system's design before making changes.
+## G11: Inappropriate Static
+
+`Math.max(double a, double b)` is an example of a good static method. It doesn't operate on a single instance, and it
+would be silly to have to say `new Math().max(a, b)` or even `a.max(b)`. Since all the data this method uses come from
+its two arguments and not from any "owning" instance. Hence, there's almost no chance that we'd want `Math.max` to be
+polymorphic.
+
+Sometimes, though, we come across static functions that should not be static. For instance, consider:
+
+```java
+HourlyPayCalculator.calculatePay(employee,overtimeRate);
+```
+
+This seems like a reasonable static function, but it doesn't operate on any particular object and gets all its data from
+its arguments.
+However, there's a reasonable chance that we'd want this function to be `polymorphic`.
+
+For example, we might want to implement different algorithms for calculating hourly pay, like
+`OvertimeHourlyPayCalculator` and `StraightTimeHourlyPayCalculator`. In such cases, the function shouldn't be static but
+should instead be a non-static function of Employee.
+
+## G12: Understand the Algorithm
+
+Programming is often an exploration. You think you know the right algorithm for something but then you fiddle with it,
+poking at it to mak eit work, but it only works for the test case you have in mind. So you should understand it
+completely.
+
+## G13: Make Logical Dependencies Physical
+
+ ```java
+public class HourlyReporter {
+    private HourlyReportFormatter formatter;
+    private List<LineItem> page;
+    private static final int PAGE_SIZE = 55;
+
+    public HourlyReporter(HourlyReportFormatter formatter) {
+        this.formatter = formatter;
+        this.page = new ArrayList<LineItem>();
+    }
+
+    public void generateReport(List<HourlyEmployee> employees) {
+        for (HourlyEmployee e : employees) {
+            addLineItemToPage(e);
+            if (page.size() == PAGE_SIZE) {
+                printAndClearItemList();
+            }
+        }
+
+        if (page.size() > 0) {
+            printAndClearItemList();
+        }
+    }
+
+    private void printAndClearItemList() {
+        formatter.format(page);
+        page.clear();
+    }
+
+    private void addLineItemToPage(HourlyEmployee e) {
+        LineItem item = new LineItem();
+        item.name = e.getName();
+        item.hours = e.getTenthsWorked() / 10;
+        item.tenths = e.getTenthsWorked() % 10;
+        page.add(item);
+    }
+
+    public class LineItem {
+        public String name;
+        public int hours;
+        public int tenths;
+    }
+}
+
+```
+
+The code has a logical dependency that has not been physicalized. It is the constant `PAGE_SIZE`. Why should the
+`HourlyReporter` know the size of the page? Page size should be the responsibility of the `HourlyReportFormatter`.
+
+The fact that `PAGE_SIZE` is declared in `HourlyReporter` represents a misplaced responsibility that causes
+`HourlyReporter` to assume that it knows what the page size ought to be. Such an assumption is a logical dependency.
+
+We can physicalize this dependency by creating a new method in `HourlyReportFormatter` named `getMaxPageSize()`.
+`HourlyReporter` will then call that function rather than using the `PAGE_SIZE` constant.
+
+## G14: Replace Magic Numbers with Named Constants
+
+For example, the number `86,400` should be hidden behind the constant `SECONDS_PER_DAY`. If you are printing `55` lines
+per
+page, then the constant `55` should be hidden behind the constant `LINES_PER_PAGE`.
+
+Some constants are so easy to recognize that they don’t always need a named constant to hide behind so long as they are
+used in conjunction with very self-explanatory code. For example:
+
+```java
+        double milesWalked=feetWalked/5280.0;
+        int dailyPay=hourlyRate*8;
+        double circumference=radius*Math.PI*2;
+```
+
+Do we really need the constants `FEET_PER_MILE`, `WORK_HOURS_PER_DAY`, and `TWO` in the above examples? Clearly, the
+last case
+is absurd. There are some formulae in which constants are simply better written as raw numbers.
+
+Constants like `3.141592653589793` are also very well known and easily recognizable. However, the chance for error is
+too
+great to leave them raw. Every time someone sees `3.1415927535890793`, they know that it is `π`, and so they fail to
+scrutinize it. (`Did you catch the single-digit error?`) We also don’t want people using `3.14`, `3.14159`, `3.142`, and
+so
+forth. Therefore, it is a good thing that `Math.PI` has already been defined for us.
+
+## G15: Functions Should Do One Thing
+
+It is often tempting to create functions that have multiple sections that perform a series of operations.
+Functions of this kind do more than _one thing_, and should be converted into many smaller functions, each of which does
+_one thing_.
+
+For example:
+
+```java
+public class _ {
+    public void pay() {
+        for (Employee e : employees) {
+            if (e.isPayday()) {
+                Money pay = e.calculatePay();
+                e.deliverPay(pay);
+            }
+        }
+    }
+}
+```
+
+This bit of code does three things. It loops over all the employees, checks to see whether each employee ought to be
+paid, and then pays the employee. This code would be better written as:
+
+```java
+public class _ {
+    public void pay() {
+        for (Employee e : employees) {
+            payIfNecessary(e);
+        }
+    }
+
+    private void payIfNecessary(Employee e) {
+        if (e.isPayday()) {
+            calculateAndDeliverPay(e);
+        }
+    }
+
+    private void calculateAndDeliverPay(Employee e) {
+        Money pay = e.calculatePay();
+        e.deliverPay(pay);
+    }
+}
+
+```
+
+## G16: Hidden Temporal Couplings
+
+```java
+public class MoogDiver {
+    Gradient gradient;
+    List<Spline> splines;
+
+    public void dive(String reason) {
+        saturateGradient();
+        reticulateSplines();
+        diveForMoog(reason);
+    }
+}
+```
+
+The order of the three functions is important. You must saturate the gradient before you can reticulate the splines, and
+only then can you dive for the moog. Unfortunately, the code does not enforce this temporal coupling. Another programmer
+could call `reticulateSplines` before `saturateGradient` was called, leading to an `UnsaturatedGradientException`. A
+better solution is:
+
+```java
+public class MoogDiver {
+    Gradient gradient;
+    List<Spline> splines;
+
+    public void dive(String reason) {
+        Gradient gradient = saturateGradient();
+        List<Spline> splines = reticulateSplines(gradient);
+        diveForMoog(splines, reason);
+    }
+}
+
+```
+
+You might complain that this increases the complexity of the functions, and you'd be right. But that extra syntactic
+complexity exposes the true temporal complexity of the situation.
+
+Note: I left the instance variables in place. I presume that they are needed by private methods in the class. Even so, I
+want the arguments in place to make the temporal coupling explicit.
