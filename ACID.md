@@ -69,6 +69,20 @@ To ensure the correctness of a transaction, it must be **Atomic**, **Consistent*
 - ***Isolation*** guarantees that concurrent transactions should produce the same result that sequentially transactions
   would have produced.
 
+  Isolation helps to prevent various types of concurrency problems, such as dirty reads, non-repeatable reads, and
+  phantom reads.
+  Here’s a breakdown of what each of these terms means:
+
+    - **Dirty Read**: This occurs when a transaction reads data that has been modified by another transaction but not
+      yet
+      committed. If the other transaction is rolled back, the first transaction will have read data that was never
+      officially in the database.
+    - **Non-repeatable Read**: This happens when a transaction reads the same row twice and finds different data each
+      time because another transaction updated the row between the two reads.
+    - **Phantom Read**: This occurs when a transaction re-executes a query returning a set of rows that satisfy a
+      search condition and finds that the set of rows satisfying the condition has changed because of another
+      recently-committed transaction.
+
   This code snippet demonstrates setting the isolation level of a transaction to prevent interference from other
   transactions:
 
@@ -104,6 +118,26 @@ To ensure the correctness of a transaction, it must be **Atomic**, **Consistent*
   }
   
   ```
+
+  ### Levels of Isolation
+  SQL databases define several isolation levels which control the degree to which one transaction must be isolated from
+  resource or data modifications made by other transactions. Isolation levels are defined by the SQL standard and are
+  implemented using locks or other mechanisms:
+
+    - Read Uncommitted: This is the lowest level of isolation. Transactions may read changes made by other transactions
+      even
+      before they are committed. This level allows dirty reads.
+
+    - Read Committed: This prevents dirty reads. A transaction can only see changes committed by other transactions.
+      However,
+      it can still experience non-repeatable reads.
+
+    - Repeatable Read: This level prevents non-repeatable reads by ensuring that if a transaction reads a row, other
+      transactions cannot modify or delete that row until the first transaction completes.
+
+    - Serializable: This is the highest level of isolation. Transactions are fully isolated from one another,
+      essentially
+      queuing them to operate one after the other. This prevents dirty reads, non-repeatable reads, and phantom reads.
 
 - Lastly, ***durability*** means that committed transactions remain committed irrespective of any type of system
   failure.
